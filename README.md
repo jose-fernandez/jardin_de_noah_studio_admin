@@ -1,8 +1,9 @@
 # Jardin de Noah Studio Admin
 
-<p style="width:100px; margin: auto">
-  <img src="./public/images/logo.svg" />
+<p align="center" width="100%">
+    <img width="33%" src="./public/images/logo.svg">
 </p>
+
 Welcome to Jardin de Noah Studio Admin repository! This repository contains the admin panel for managing the operations and settings of Jardin de Noah Studio.
 
 ## Table of Contents
@@ -13,7 +14,6 @@ Welcome to Jardin de Noah Studio Admin repository! This repository contains the 
   - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
 - [Contact](#contact)
 
 ## Features
@@ -67,10 +67,7 @@ We welcome contributions from the community! If you find any issues or have sugg
 
 For more details, please read our Contributing Guide.
 
-## License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
 ## Contact
-For any inquiries or feedback, please contact us at studio@example.com.
+For any inquiries or feedback, please contact us at jardindenoahstudio@gmail.com.
 
 Happy coding!
