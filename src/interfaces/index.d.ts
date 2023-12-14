@@ -102,16 +102,21 @@ export interface IOrder {
     amount: number;
 }
 
+// export interface IProduct {
+//     id: number;
+//     name: string;
+//     isActive: boolean;
+//     description: string;
+//     images: IFile[];
+//     createdAt: string;
+//     price: number;
+// }
 export interface IProduct {
     id: number;
     name: string;
-    isActive: boolean;
-    description: string;
     images: IFile[];
-    createdAt: string;
-    price: number;
-    category: ICategory;
-    stock: number;
+    description: string;
+    price: float;
 }
 
 export interface ICategory {

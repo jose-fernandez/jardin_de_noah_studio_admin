@@ -43,7 +43,7 @@ export const EditProduct: React.FC<
 }) => {
     const t = useTranslate();
 
-    const apiUrl = useApiUrl();
+    // const apiUrl = useApiUrl();
 
     const { autocompleteProps } = useAutocomplete<ICategory>({
         resource: "categories",
@@ -61,16 +61,16 @@ export const EditProduct: React.FC<
 
         formData.append("file", file);
 
-        const res = await axios.post<{ url: string }>(
-            `${apiUrl}/media/upload`,
-            formData,
-            {
-                withCredentials: false,
-                headers: {
-                    "Access-Control-Allow-Origin": "*",
-                },
-            },
-        );
+        // const res = await axios.post<{ url: string }>(
+        //     `${apiUrl}/media/upload`,
+        //     formData,
+        //     {
+        //         withCredentials: false,
+        //         headers: {
+        //             "Access-Control-Allow-Origin": "*",
+        //         },
+        //     },
+        // );
 
         const { name, size, type, lastModified } = file;
 

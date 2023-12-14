@@ -31,6 +31,7 @@ export const ProductItem: React.FC<PropductItem> = ({
 }) => {
     const t = useTranslate();
     const { id, name, description, images, price } = product;
+    const parsedPrice = parseFloat(price).toFixed(2);
 
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -158,7 +159,7 @@ export const ProductItem: React.FC<PropductItem> = ({
                         my: 1,
                     }}
                 >{`#10000${id}`}</Typography>
-                <Tooltip title={`${price / 100}$`} placement="top">
+                <Tooltip title={`${parsedPrice}€`} placement="top">
                     <Typography
                         sx={{
                             fontWeight: 500,
@@ -168,7 +169,7 @@ export const ProductItem: React.FC<PropductItem> = ({
                             textOverflow: "ellipsis",
                             display: "-webkit-box",
                         }}
-                    >{`${price / 100}$`}</Typography>
+                    >{`${parsedPrice}€`}</Typography>
                 </Tooltip>
                 {updateStock && (
                     <TextField

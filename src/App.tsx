@@ -8,7 +8,7 @@ import {
 } from "@refinedev/mui";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import CssBaseline from "@mui/material/CssBaseline";
-import dataProvider from "@refinedev/simple-rest";
+import { dataProvider, liveProvider } from "@refinedev/supabase";
 import routerProvider, {
     CatchAllNavigate,
     NavigateToResource,
@@ -44,6 +44,8 @@ import { ColorModeContextProvider } from "./contexts";
 import { Header, Title, OffLayoutArea } from "./components";
 import { BikeWhiteIcon } from "./components/icons/bike-white";
 import { useAutoLoginForDemo } from "./hooks";
+import { supabaseClient } from "./utility";
+
 
 const API_URL = "https://api.finefoods.refine.dev";
 
@@ -75,7 +77,8 @@ const App: React.FC = () => {
                     <RefineSnackbarProvider>
                         <Refine
                             routerProvider={routerProvider}
-                            dataProvider={dataProvider(API_URL)}
+                            dataProvider={dataProvider(supabaseClient)}
+                            liveProvider={liveProvider(supabaseClient)}
                             authProvider={authProvider}
                             i18nProvider={i18nProvider}
                             options={{
