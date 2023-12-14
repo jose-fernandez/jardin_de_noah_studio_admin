@@ -268,7 +268,7 @@ export const EditProduct: React.FC<
                                         </FormHelperText>
                                     )}
                                 </FormControl>
-                                <FormControl sx={{ marginTop: "10px" }}>
+                                {/* <FormControl sx={{ marginTop: "10px" }}>
                                     <Controller
                                         control={control}
                                         name="category"
@@ -327,7 +327,7 @@ export const EditProduct: React.FC<
                                             {errors.category.message}
                                         </FormHelperText>
                                     )}
-                                </FormControl>
+                                </FormControl> */}
                                 <FormControl>
                                     <FormLabel required>
                                         {t("products.fields.isActive")}

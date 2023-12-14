@@ -1,6 +1,5 @@
 import React from "react";
-import axios from "axios";
-import { useTranslate, useApiUrl, HttpError } from "@refinedev/core";
+import { useTranslate, HttpError } from "@refinedev/core";
 import { UseModalFormReturnType } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
 import { Create, useAutocomplete } from "@refinedev/mui";
@@ -17,15 +16,14 @@ import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import FormControl from "@mui/material/FormControl";
-import Autocomplete from "@mui/material/Autocomplete";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormHelperText from "@mui/material/FormHelperText";
-import TextField from "@mui/material/TextField";
 
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
 
 import { ICategory, IFile, IProduct, Nullable } from "../../interfaces";
+import { supabaseClient } from "@/utility";
 
 export const CreateProduct: React.FC<
     UseModalFormReturnType<IProduct, HttpError, Nullable<IProduct>>
@@ -42,8 +40,6 @@ export const CreateProduct: React.FC<
 }) => {
     const t = useTranslate();
 
-    // const apiUrl = useApiUrl();
-
     const { autocompleteProps } = useAutocomplete<ICategory>({
         resource: "categories",
     });
@@ -53,34 +49,29 @@ export const CreateProduct: React.FC<
     const onChangeHandler = async (
         event: React.ChangeEvent<HTMLInputElement>,
     ) => {
-        const formData = new FormData();
-
         const target = event.target;
         const file: File = (target.files as FileList)[0];
 
-        formData.append("file", file);
+        await supabaseClient.storage
+            .from("products")
+            .upload(`${file.name}`, file);
 
-        // const res = await axios.post<{ url: string }>(
-        //     `${apiUrl}/media/upload`,
-        //     formData,
-        //     {
-        //         withCredentials: false,
-        //         headers: {
-        //             "Access-Control-Allow-Origin": "*",
-        //         },
-        //     },
-        // );
+        const { data } =
+            await supabaseClient.storage
+                .from("products")
+                .getPublicUrl(
+                    `${file.name}`,
+                );
 
         const { name, size, type, lastModified } = file;
 
-        // eslint-disable-next-line
         const imagePaylod: any = [
             {
                 name,
                 size,
                 type,
                 lastModified,
-                url: res.data.url,
+                url: data.publicUrl,
             },
         ];
 
@@ -272,7 +263,7 @@ export const CreateProduct: React.FC<
                                         </FormHelperText>
                                     )}
                                 </FormControl>
-                                <FormControl>
+                                {/* <FormControl>
                                     <Controller
                                         control={control}
                                         name="category"
@@ -325,7 +316,7 @@ export const CreateProduct: React.FC<
                                             {errors.category.message}
                                         </FormHelperText>
                                     )}
-                                </FormControl>
+                                </FormControl> */}
                                 <FormControl>
                                     <FormLabel
                                         sx={{ marginTop: "10px" }}

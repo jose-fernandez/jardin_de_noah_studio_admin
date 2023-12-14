@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useTranslate, BaseKey } from "@refinedev/core";
+import { DeleteButton } from "@refinedev/mui";
 
 import Card from "@mui/material/Card";
+import Chip from "@mui/material/Chip";
 import CardHeader from "@mui/material/CardHeader";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -17,6 +19,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditIcon from "@mui/icons-material/Edit";
 
 import { IProduct } from "../../interfaces";
+import { supabaseClient } from "@/utility";
 
 type PropductItem = {
     updateStock?: (changedValue: number, clickedProduct: IProduct) => void;
@@ -30,7 +33,7 @@ export const ProductItem: React.FC<PropductItem> = ({
     updateStock,
 }) => {
     const t = useTranslate();
-    const { id, name, description, images, price } = product;
+    const { id, name, description, images, price, isActive } = product;
     const parsedPrice = parseFloat(price).toFixed(2);
 
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -41,6 +44,15 @@ export const ProductItem: React.FC<PropductItem> = ({
 
     const handleClose = () => {
         setAnchorEl(null);
+    };
+
+    const removeMedia = async () => {
+        const [{ name }] = images;
+        const { data: storageData, error: storageError } = await supabaseClient
+            .storage
+            .from('products')
+            .remove([name])
+        // TODO: handle error if delete fails
     };
 
     const open = Boolean(anchorEl);
@@ -56,6 +68,14 @@ export const ProductItem: React.FC<PropductItem> = ({
             }}
         >
             <CardHeader
+                subheader={!isActive 
+                    ? <Chip 
+                        color="warning"
+                        size="small"
+                        variant="outlined"
+                        label={t("products.fields.draft")}
+                        />
+                    : ''}
                 action={
                     <Box component="div">
                         <IconButton
@@ -76,6 +96,10 @@ export const ProductItem: React.FC<PropductItem> = ({
                                 horizontal: "left",
                             }}
                         >
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "column",
+                            }}>
                             <Button
                                 onClick={() => {
                                     show(id);
@@ -85,10 +109,22 @@ export const ProductItem: React.FC<PropductItem> = ({
                                 startIcon={<EditIcon />}
                                 sx={{
                                     padding: "5px 10px",
+                                    display: "flex",
+                                    justifyContent: "flex-start",
                                 }}
                             >
                                 {t("stores.buttons.edit")}
                             </Button>
+                            <DeleteButton
+                                recordItemId={id}
+                                children={t("stores.buttons.remove")}
+                                onSuccess={removeMedia}
+                                sx={{
+                                    padding: "5px 10px",
+                                    fontSize: "13px",
+                                }}
+                            />
+                            </div>
                         </Popover>
                     </Box>
                 }

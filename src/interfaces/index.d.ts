@@ -117,6 +117,7 @@ export interface IProduct {
     images: IFile[];
     description: string;
     price: float;
+    isActive: boolean;
 }
 
 export interface ICategory {

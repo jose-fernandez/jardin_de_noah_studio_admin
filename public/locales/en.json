@@ -286,6 +286,7 @@
             "id": "ID",
             "name": "Name",
             "description": "Description",
+            "draft": "Draft",
             "isActive": "Active",
             "price": "Price",
             "category": "Category",
@@ -330,7 +331,8 @@
             "editProducts": "Edit Products",
             "addProduct": "Add Product",
             "outOfStock": "Out Of Stock",
-            "edit": "Edit Product"
+            "edit": "Edit Product",
+            "remove": "Delete Product"
         },
         "selectLocation": "Choose store location on the map",
         "storeProducts": "Store Products",
