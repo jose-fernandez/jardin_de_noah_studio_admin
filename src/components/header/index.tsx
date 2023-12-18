@@ -126,9 +126,9 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = () => {
 
     useEffect(() => {
         setOptions([]);
-        refetchOrders();
-        refetchCouriers();
-        refetchStores();
+        // refetchOrders();
+        // refetchCouriers();
+        // refetchStores();
     }, [value]);
 
     return (
