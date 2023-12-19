@@ -5,6 +5,8 @@ import {
     IResourceComponentsProps,
     useTable,
     useNotification,
+    useCreate,
+    useDelete,
     getDefaultFilter,
     HttpError,
 } from "@refinedev/core";
@@ -27,13 +29,13 @@ import {
     EditProduct,
 } from "../../components";
 import { IProduct, Nullable } from "../../interfaces";
-import { supabaseClient } from "@/utility";
 
-export const ProductList: React.FC<IResourceComponentsProps> = (props) => {
+export const ProductList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
-    const [categories, setCategories] = useState<number[]>([]);
-
-    const { tableQueryResult, setFilters, setCurrent, filters, pageCount } =
+    const [categoriesState, setCategoriesState] = useState<number[]>([]);
+    const { mutate: mutateCreateMany } = useCreate();
+    const { mutate: mutateDelete } = useDelete();
+    const { tableQueryResult, setFilters, setCurrent, setPageSize, filters, pageCount } =
         useTable<IProduct>({
             resource: "products",
             initialPageSize: 12,
@@ -47,30 +49,40 @@ export const ProductList: React.FC<IResourceComponentsProps> = (props) => {
         HttpError,
         Nullable<IProduct>
     >({
-        refineCoreProps: { 
+        refineCoreProps: {
             action: "create", 
             meta: { select: "id"},
+            successNotification: false,
             onMutationSuccess: async ({ data }, variables, context, isAutoSave) => {
-                const { data: response, error } = await supabaseClient
-                    .from('categoriesProducts')
-                    .insert(categories?.map(categoryId => ({
-                        categorysdId: categoryId, productId: data.id,
-                    })))
-                    .select();
-                if (error) {
-                    await supabaseClient
-                    .from('products')
-                    .delete()
-                    .eq('id', data.id);
-                    
-                    showCreateDrawer();
-                    setCategories([]);
-                    openNotification({
-                        type: "error",
-                        description: t("notifications.error", { statusCode: 400 }),
-                        message: t("notifications.createError", { resource: 'products' }),
-                    })
-                }
+                mutateCreateMany({
+                    resource: "categoriesProducts",
+                    meta: {
+                        select: 'id',
+                    },
+                    values: categoriesState?.map(categoryId => ({
+                        categoryId: categoryId, productId: data.id,
+                    })),
+                    successNotification: false,
+                },
+                {
+                    onSuccess: (data, variables, context) => {
+                        openNotification({
+                            message:  t("notifications.createSuccess", { resource: 'products' }),
+                            description: t("notifications.success", { statusCode: 400 }),
+                            type: "success",
+                        });
+                    },
+                    onError: (error, { values }, context) => {
+                        const [{productId}] = values;
+                        mutateDelete({
+                            resource: 'products',
+                            id: productId,
+                            successNotification: false,
+                        });
+                        setCategoriesState([]);
+                        showCreateDrawer();
+                    }
+                })
             },
         },
         
@@ -85,7 +97,9 @@ export const ProductList: React.FC<IResourceComponentsProps> = (props) => {
         HttpError,
         Nullable<IProduct>
     >({
-        refineCoreProps: { action: "edit" },
+        refineCoreProps: { 
+            action: "edit"
+        },
     });
 
     const {
@@ -95,7 +109,7 @@ export const ProductList: React.FC<IResourceComponentsProps> = (props) => {
     const products: IProduct[] = tableQueryResult.data?.data || [];
     return (
         <>
-            <CreateProduct updateCategories={setCategories} {...createDrawerFormProps} />
+            <CreateProduct updateCategories={setCategoriesState} {...createDrawerFormProps} />
             <EditProduct {...editDrawerFormProps} />
             <Paper
                 sx={{

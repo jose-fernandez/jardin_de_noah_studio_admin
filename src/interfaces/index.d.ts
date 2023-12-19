@@ -123,6 +123,7 @@ export interface IProduct {
     description: string;
     price: float;
     isActive: boolean;
+    categories: ICategory[];
 }
 
 export interface ICategory {

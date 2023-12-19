@@ -44,7 +44,7 @@ export const CreateProduct: React.FC<
     saveButtonProps,
 }) => {
     const t = useTranslate();
-    const [categories, setCategories] = useState<ICategory[]>([]);
+    const [categoriesFulfilled, setCategoriesFulfilled] = useState<boolean>(false);
 
     const { autocompleteProps } = useAutocomplete<ICategory>({
         resource: "categories",
@@ -83,28 +83,18 @@ export const CreateProduct: React.FC<
 
         setValue("images", imagePaylod, { shouldValidate: true });
     };
-
-    const customSaveButtonProps = {
-        ...saveButtonProps,
-        onClick: (e) => {
-            if (categories && categories.length) control.unregister('categories')
-            else control.register('categories')
-            console.log('categories-real', categories);
-
-            console.log('control', control);
-            saveButtonProps.onClick(e)
-        },
-    }
+    
     return (
         <Drawer
             sx={{ zIndex: "1301" }}
             PaperProps={{ sx: { width: { sm: "100%", md: 500 } } }}
             open={visible}
             onClose={close}
+            variant="temporary"
             anchor="right"
         >
             <Create
-                saveButtonProps={customSaveButtonProps}
+                saveButtonProps={saveButtonProps}
                 headerProps={{
                     avatar: (
                         <IconButton
@@ -286,10 +276,9 @@ export const CreateProduct: React.FC<
                                         name="categories"
                                         ref={null}
                                         rules={{
-                                            required: t(
-                                                "errors.required.field",
-                                                { field: "Category" },
-                                            ),
+                                            required: categoriesFulfilled 
+                                                ? false
+                                                : t("errors.required.field", { field: "Category" })
                                         }}
                                         render={({ field }) => (
                                             <Autocomplete
@@ -297,12 +286,10 @@ export const CreateProduct: React.FC<
                                                 disablePortal
                                                 {...autocompleteProps}
                                                 {...field}
-                                                onChange={(_, selectedCategories: [ICategory]) => {
-                                                    setCategories(selectedCategories)
-                                                    updateCategories(selectedCategories.map(({id}) => id))
-                                                    field.onChange(selectedCategories)
-                                                    console.log('field', field)
-                                                    
+                                                key={`categories-key-${visible}`}
+                                                onChange={(_, value: ICategory[]) => {
+                                                    setCategoriesFulfilled(!!value.length)
+                                                    updateCategories(value.map(({id}) => id))
                                                 }}
                                                 getOptionLabel={(item) => {
                                                     return item.title
