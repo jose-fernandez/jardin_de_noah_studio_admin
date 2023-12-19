@@ -1,8 +1,10 @@
 import React from "react";
+import { useState } from "react";
 import {
     useTranslate,
     IResourceComponentsProps,
     useTable,
+    useNotification,
     getDefaultFilter,
     HttpError,
 } from "@refinedev/core";
@@ -25,22 +27,53 @@ import {
     EditProduct,
 } from "../../components";
 import { IProduct, Nullable } from "../../interfaces";
+import { supabaseClient } from "@/utility";
 
-export const ProductList: React.FC<IResourceComponentsProps> = () => {
+export const ProductList: React.FC<IResourceComponentsProps> = (props) => {
     const t = useTranslate();
+    const [categories, setCategories] = useState<number[]>([]);
 
     const { tableQueryResult, setFilters, setCurrent, filters, pageCount } =
         useTable<IProduct>({
             resource: "products",
             initialPageSize: 12,
+            meta: {
+                select: "*, categories!inner(id)",
+            },
         });
-
-    const createDrawerFormProps = useModalForm<
+    const { open: openNotification } = useNotification();
+    let createDrawerFormProps = useModalForm<
         IProduct,
         HttpError,
         Nullable<IProduct>
     >({
-        refineCoreProps: { action: "create" },
+        refineCoreProps: { 
+            action: "create", 
+            meta: { select: "id"},
+            onMutationSuccess: async ({ data }, variables, context, isAutoSave) => {
+                const { data: response, error } = await supabaseClient
+                    .from('categoriesProducts')
+                    .insert(categories?.map(categoryId => ({
+                        categorysdId: categoryId, productId: data.id,
+                    })))
+                    .select();
+                if (error) {
+                    await supabaseClient
+                    .from('products')
+                    .delete()
+                    .eq('id', data.id);
+                    
+                    showCreateDrawer();
+                    setCategories([]);
+                    openNotification({
+                        type: "error",
+                        description: t("notifications.error", { statusCode: 400 }),
+                        message: t("notifications.createError", { resource: 'products' }),
+                    })
+                }
+            },
+        },
+        
     });
 
     const {
@@ -60,10 +93,9 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
     } = editDrawerFormProps;
 
     const products: IProduct[] = tableQueryResult.data?.data || [];
-
     return (
         <>
-            <CreateProduct {...createDrawerFormProps} />
+            <CreateProduct updateCategories={setCategories} {...createDrawerFormProps} />
             <EditProduct {...editDrawerFormProps} />
             <Paper
                 sx={{

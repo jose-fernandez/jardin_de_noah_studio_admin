@@ -111,6 +111,11 @@ export interface IOrder {
 //     createdAt: string;
 //     price: number;
 // }
+
+export interface ICategoryProduct {
+    categoryId: ICategory;
+    productId: IProduct;
+}
 export interface IProduct {
     id: number;
     name: string;

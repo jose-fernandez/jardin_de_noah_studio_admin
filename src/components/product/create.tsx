@@ -1,15 +1,18 @@
 import React from "react";
+import {useState} from "react";
 import { useTranslate, HttpError } from "@refinedev/core";
 import { UseModalFormReturnType } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
 import { Create, useAutocomplete } from "@refinedev/mui";
 
+import Autocomplete from "@mui/material/Autocomplete";
 import Drawer from "@mui/material/Drawer";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Input from "@mui/material/Input";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import Avatar from "@mui/material/Avatar";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import FormLabel from "@mui/material/FormLabel";
 import Stack from "@mui/material/Stack";
@@ -24,12 +27,14 @@ import CloseOutlined from "@mui/icons-material/CloseOutlined";
 
 import { ICategory, IFile, IProduct, Nullable } from "../../interfaces";
 import { supabaseClient } from "@/utility";
-
+// TODO New VIEW with supabase rpc()
 export const CreateProduct: React.FC<
     UseModalFormReturnType<IProduct, HttpError, Nullable<IProduct>>
 > = ({
+
     watch,
     setValue,
+    updateCategories,
     register,
     formState: { errors },
     control,
@@ -39,6 +44,7 @@ export const CreateProduct: React.FC<
     saveButtonProps,
 }) => {
     const t = useTranslate();
+    const [categories, setCategories] = useState<ICategory[]>([]);
 
     const { autocompleteProps } = useAutocomplete<ICategory>({
         resource: "categories",
@@ -78,6 +84,17 @@ export const CreateProduct: React.FC<
         setValue("images", imagePaylod, { shouldValidate: true });
     };
 
+    const customSaveButtonProps = {
+        ...saveButtonProps,
+        onClick: (e) => {
+            if (categories && categories.length) control.unregister('categories')
+            else control.register('categories')
+            console.log('categories-real', categories);
+
+            console.log('control', control);
+            saveButtonProps.onClick(e)
+        },
+    }
     return (
         <Drawer
             sx={{ zIndex: "1301" }}
@@ -87,7 +104,7 @@ export const CreateProduct: React.FC<
             anchor="right"
         >
             <Create
-                saveButtonProps={saveButtonProps}
+                saveButtonProps={customSaveButtonProps}
                 headerProps={{
                     avatar: (
                         <IconButton
@@ -253,7 +270,7 @@ export const CreateProduct: React.FC<
                                         }}
                                         startAdornment={
                                             <InputAdornment position="start">
-                                                $
+                                                €
                                             </InputAdornment>
                                         }
                                     />
@@ -263,10 +280,11 @@ export const CreateProduct: React.FC<
                                         </FormHelperText>
                                     )}
                                 </FormControl>
-                                {/* <FormControl>
+                                <FormControl>
                                     <Controller
                                         control={control}
-                                        name="category"
+                                        name="categories"
+                                        ref={null}
                                         rules={{
                                             required: t(
                                                 "errors.required.field",
@@ -275,11 +293,16 @@ export const CreateProduct: React.FC<
                                         }}
                                         render={({ field }) => (
                                             <Autocomplete
+                                                multiple
                                                 disablePortal
                                                 {...autocompleteProps}
                                                 {...field}
-                                                onChange={(_, value) => {
-                                                    field.onChange(value);
+                                                onChange={(_, selectedCategories: [ICategory]) => {
+                                                    setCategories(selectedCategories)
+                                                    updateCategories(selectedCategories.map(({id}) => id))
+                                                    field.onChange(selectedCategories)
+                                                    console.log('field', field)
+                                                    
                                                 }}
                                                 getOptionLabel={(item) => {
                                                     return item.title
@@ -302,7 +325,7 @@ export const CreateProduct: React.FC<
                                                         label="Category"
                                                         variant="outlined"
                                                         error={
-                                                            !!errors.category
+                                                            !!errors.categories
                                                                 ?.message
                                                         }
                                                         required
@@ -311,12 +334,12 @@ export const CreateProduct: React.FC<
                                             />
                                         )}
                                     />
-                                    {errors.category && (
+                                    {errors.categories && (
                                         <FormHelperText error>
-                                            {errors.category.message}
+                                            {errors.categories.message}
                                         </FormHelperText>
                                     )}
-                                </FormControl> */}
+                                </FormControl>
                                 <FormControl>
                                     <FormLabel
                                         sx={{ marginTop: "10px" }}
@@ -327,6 +350,7 @@ export const CreateProduct: React.FC<
                                     <Controller
                                         control={control}
                                         {...register("isActive")}
+                                        ref={null}
                                         defaultValue={false}
                                         render={({ field }) => (
                                             <RadioGroup
