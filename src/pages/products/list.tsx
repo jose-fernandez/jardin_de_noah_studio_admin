@@ -39,10 +39,13 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
     const { tableQueryResult, setFilters, setCurrent, setPageSize, filters, pageCount } =
         useTable<IProduct>({
             resource: "products",
-            initialPageSize: 12,
             meta: {
                 select: "*, categories!inner(*)",
             },
+            pagination: {
+                pageSize: 9,
+                mode: 'server',
+            }
         });
     const { open: openNotification } = useNotification();
 
@@ -181,11 +184,6 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
                                     inputProps={{
                                         "aria-label": "product search",
                                     }}
-                                    value={getDefaultFilter(
-                                        "name",
-                                        filters,
-                                        "contains",
-                                    )}
                                     onKeyDownCapture={(e) => {
                                         if (e.code === 'Enter') e.preventDefault()
                                     }}
