@@ -1,6 +1,7 @@
 import React from "react";
-import axios from "axios";
-import { useTranslate, useApiUrl, HttpError } from "@refinedev/core";
+import { useState, useEffect } from "react";
+
+import { useTranslate, HttpError } from "@refinedev/core";
 import { useAutocomplete, Edit } from "@refinedev/mui";
 import { UseModalFormReturnType } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
@@ -26,62 +27,70 @@ import Autocomplete from "@mui/material/Autocomplete";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { ICategory, IFile, IProduct, Nullable } from "../../interfaces";
+import { supabaseClient } from "@/utility";
 
 export const EditProduct: React.FC<
     UseModalFormReturnType<IProduct, HttpError, Nullable<IProduct>>
 > = ({
     watch,
     setValue,
+    updateCategories,
     register,
     formState: { errors },
     control,
-    refineCore: { onFinish },
+    refineCore: { onFinish, queryResult },
     handleSubmit,
     modal: { visible, close },
     saveButtonProps,
     getValues,
 }) => {
     const t = useTranslate();
-
-    // const apiUrl = useApiUrl();
+    const [editCategoriesFulfilled, setEditCategoriesFulfilled] = useState<boolean>(false);
+    const [categories, setCategories] = useState<ICategory[]>([]);
 
     const { autocompleteProps } = useAutocomplete<ICategory>({
         resource: "categories",
     });
+
+    useEffect(() => {
+        if (queryResult?.data) {
+            setCategories(queryResult.data?.data.categories)
+        }
+      }, [queryResult?.data, visible]);
+
+    useEffect(() => {
+        return () => setCategories([])
+    }, [visible]);
+
 
     const imageInput = watch("images");
 
     const onChangeHandler = async (
         event: React.ChangeEvent<HTMLInputElement>,
     ) => {
-        const formData = new FormData();
-
         const target = event.target;
         const file: File = (target.files as FileList)[0];
 
-        formData.append("file", file);
+        await supabaseClient.storage
+            .from("products")
+            .upload(`${file.name}`, file);
 
-        // const res = await axios.post<{ url: string }>(
-        //     `${apiUrl}/media/upload`,
-        //     formData,
-        //     {
-        //         withCredentials: false,
-        //         headers: {
-        //             "Access-Control-Allow-Origin": "*",
-        //         },
-        //     },
-        // );
+        const { data } =
+            await supabaseClient.storage
+                .from("products")
+                .getPublicUrl(
+                    `${file.name}`,
+                );
 
         const { name, size, type, lastModified } = file;
 
-        // eslint-disable-next-line
         const imagePaylod: any = [
             {
                 name,
                 size,
                 type,
                 lastModified,
-                url: res.data.url,
+                url: data.publicUrl,
             },
         ];
 
@@ -268,34 +277,34 @@ export const EditProduct: React.FC<
                                         </FormHelperText>
                                     )}
                                 </FormControl>
-                                {/* <FormControl sx={{ marginTop: "10px" }}>
+                                <FormControl>
                                     <Controller
                                         control={control}
-                                        name="category"
+                                        name={editCategoriesFulfilled ? "" : "categories"}
+                                        ref={null}
                                         rules={{
-                                            required: t(
-                                                "errors.required.field",
-                                                { field: "Category" },
-                                            ),
+                                            required: editCategoriesFulfilled 
+                                                ? false
+                                                : t("errors.required.field", { field: "Category" })
                                         }}
-                                        // eslint-disable-next-line
-                                        defaultValue={null as any}
-                                        render={({ field }) => (
+                                        render={({field}) => (
                                             <Autocomplete
+                                                multiple
                                                 disablePortal
                                                 {...autocompleteProps}
                                                 {...field}
-                                                onChange={(_, value) => {
-                                                    field.onChange(value);
+                                                value={categories}
+                                                key={`categories-key-${visible}`}
+                                                onChange={(_, value: ICategory[]) => {
+                                                    setEditCategoriesFulfilled(!!value.length)
+                                                    setCategories(value);
+                                                    updateCategories(value.map(({id}) => id))
+                                                    if (!value.length) field.onChange(undefined)
                                                 }}
                                                 getOptionLabel={(item) => {
                                                     return item.title
                                                         ? item.title
-                                                        : autocompleteProps?.options?.find(
-                                                              (p) =>
-                                                                  p.id.toString() ===
-                                                                  item.toString(),
-                                                          )?.title ?? "";
+                                                        : "";
                                                 }}
                                                 isOptionEqualToValue={(
                                                     option,
@@ -313,7 +322,7 @@ export const EditProduct: React.FC<
                                                         label="Category"
                                                         variant="outlined"
                                                         error={
-                                                            !!errors.category
+                                                            !!errors.categories
                                                                 ?.message
                                                         }
                                                         required
@@ -322,12 +331,12 @@ export const EditProduct: React.FC<
                                             />
                                         )}
                                     />
-                                    {errors.category && (
+                                    {errors.categories && (
                                         <FormHelperText error>
-                                            {errors.category.message}
+                                            {errors.categories.message}
                                         </FormHelperText>
                                     )}
-                                </FormControl> */}
+                                </FormControl>
                                 <FormControl>
                                     <FormLabel required>
                                         {t("products.fields.isActive")}
@@ -335,6 +344,7 @@ export const EditProduct: React.FC<
                                     <Controller
                                         control={control}
                                         {...register("isActive")}
+                                        ref={null}
                                         defaultValue={false}
                                         render={({ field }) => {
                                             return (

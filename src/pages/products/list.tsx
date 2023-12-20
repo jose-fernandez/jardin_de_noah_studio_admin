@@ -29,6 +29,7 @@ import {
     EditProduct,
 } from "../../components";
 import { IProduct, Nullable } from "../../interfaces";
+import { supabaseClient } from "@/utility";
 
 export const ProductList: React.FC<IResourceComponentsProps> = () => {
     const t = useTranslate();
@@ -40,10 +41,41 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
             resource: "products",
             initialPageSize: 12,
             meta: {
-                select: "*, categories!inner(id)",
+                select: "*, categories!inner(*)",
             },
         });
     const { open: openNotification } = useNotification();
+
+    const createRelationRows = (productId: number, categoryIds: number[]) => {
+        mutateCreateMany({
+            resource: "categoriesProducts",
+            meta: {
+                select: 'id',
+            },
+            values: categoryIds?.map(categoryId => ({
+                categoryId: categoryId, productId,
+            })),
+            successNotification: false,
+        },
+        {
+            onSuccess: () => {
+                openNotification({
+                    message:  t("notifications.createSuccess", { resource: 'products' }),
+                    description: t("notifications.success", { statusCode: 400 }),
+                    type: "success",
+                });
+            },
+            onError: () => {
+                mutateDelete({
+                    resource: 'products',
+                    id: productId,
+                    successNotification: false,
+                });
+                setCategoriesState([]);
+                showCreateDrawer();
+            }
+        })
+    }
     let createDrawerFormProps = useModalForm<
         IProduct,
         HttpError,
@@ -53,41 +85,12 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
             action: "create", 
             meta: { select: "id"},
             successNotification: false,
-            onMutationSuccess: async ({ data }, variables, context, isAutoSave) => {
-                mutateCreateMany({
-                    resource: "categoriesProducts",
-                    meta: {
-                        select: 'id',
-                    },
-                    values: categoriesState?.map(categoryId => ({
-                        categoryId: categoryId, productId: data.id,
-                    })),
-                    successNotification: false,
-                },
-                {
-                    onSuccess: (data, variables, context) => {
-                        openNotification({
-                            message:  t("notifications.createSuccess", { resource: 'products' }),
-                            description: t("notifications.success", { statusCode: 400 }),
-                            type: "success",
-                        });
-                    },
-                    onError: (error, { values }, context) => {
-                        const [{productId}] = values;
-                        mutateDelete({
-                            resource: 'products',
-                            id: productId,
-                            successNotification: false,
-                        });
-                        setCategoriesState([]);
-                        showCreateDrawer();
-                    }
-                })
+            onMutationSuccess: async ({ data }) => {
+                createRelationRows(data.id, categoriesState)
             },
         },
         
     });
-
     const {
         modal: { show: showCreateDrawer },
     } = createDrawerFormProps;
@@ -98,7 +101,39 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
         Nullable<IProduct>
     >({
         refineCoreProps: { 
-            action: "edit"
+            action: "edit",
+            meta: { select: "*, categories!inner(*)",},
+            successNotification: false,
+
+            onMutationSuccess: async ({data}) => {
+                const {data: response, error} = await supabaseClient
+                    .from('categoriesProducts')
+                    .delete()
+                    .match({ productId: data.id })
+                    .select()
+                if (!error) {
+                    mutateCreateMany({
+                        resource: "categoriesProducts",
+                        meta: {
+                            select: 'id',
+                        },
+                        values: categoriesState?.map(categoryId => ({
+                            categoryId: categoryId, productId: data.id,
+                        })),
+                        successNotification: false,
+                        invalidates: ['all'],
+                    },
+                    {
+                        onSuccess: () => {
+                            openNotification({
+                                message:  t("notifications.editSuccess", { resource: 'products' }),
+                                description: t("notifications.success", { statusCode: 400 }),
+                                type: "success",
+                            });
+                        },
+                    })
+                }
+            },
         },
     });
 
@@ -110,7 +145,7 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
     return (
         <>
             <CreateProduct updateCategories={setCategoriesState} {...createDrawerFormProps} />
-            <EditProduct {...editDrawerFormProps} />
+            <EditProduct updateCategories={setCategoriesState} {...editDrawerFormProps} />
             <Paper
                 sx={{
                     paddingX: { xs: 3, md: 2 },
@@ -151,6 +186,9 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
                                         filters,
                                         "contains",
                                     )}
+                                    onKeyDownCapture={(e) => {
+                                        if (e.code === 'Enter') e.preventDefault()
+                                    }}
                                     onChange={(
                                         e: React.ChangeEvent<HTMLInputElement>,
                                     ) => {
@@ -167,7 +205,6 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
                                     }}
                                 />
                                 <IconButton
-                                    type="submit"
                                     sx={{ p: "10px" }}
                                     aria-label="search"
                                 >

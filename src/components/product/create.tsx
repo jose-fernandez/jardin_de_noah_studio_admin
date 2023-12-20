@@ -1,5 +1,6 @@
 import React from "react";
-import {useState} from "react";
+import { useState } from "react";
+
 import { useTranslate, HttpError } from "@refinedev/core";
 import { UseModalFormReturnType } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
@@ -31,7 +32,6 @@ import { supabaseClient } from "@/utility";
 export const CreateProduct: React.FC<
     UseModalFormReturnType<IProduct, HttpError, Nullable<IProduct>>
 > = ({
-
     watch,
     setValue,
     updateCategories,
