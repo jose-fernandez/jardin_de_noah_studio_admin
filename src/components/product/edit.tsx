@@ -45,7 +45,7 @@ export const EditProduct: React.FC<
     getValues,
 }) => {
     const t = useTranslate();
-    const [editCategoriesFulfilled, setEditCategoriesFulfilled] = useState<boolean>(false);
+    const [editCategoriesFulfilled, setEditCategoriesFulfilled] = useState<boolean>(true);
     const [categories, setCategories] = useState<ICategory[]>([]);
 
     const { autocompleteProps } = useAutocomplete<ICategory>({
@@ -54,14 +54,13 @@ export const EditProduct: React.FC<
 
     useEffect(() => {
         if (queryResult?.data) {
-            setCategories(queryResult.data?.data.categories)
+            setCategories(queryResult.data?.data?.categories)
         }
       }, [queryResult?.data, visible]);
 
     useEffect(() => {
         return () => setCategories([])
     }, [visible]);
-
 
     const imageInput = watch("images");
 

@@ -98,17 +98,27 @@ export const ProductList: React.FC<IResourceComponentsProps> = () => {
         modal: { show: showCreateDrawer },
     } = createDrawerFormProps;
 
+
+    const categoriesHaveChanges = (patchedProductId: number) => {
+        const [product] = products.filter(({id}) => id === patchedProductId)
+        const categoryIds = new Set(product.categories.map(({id}) => id))
+        const categoriesUpdated = categoriesState.filter(({id}) => !categoryIds.has(id))
+        return !!categoriesUpdated.length;
+    }
+
     const editDrawerFormProps = useModalForm<
         IProduct,
         HttpError,
         Nullable<IProduct>
     >({
+        modalProps: { autoResetForm: false },
         refineCoreProps: { 
             action: "edit",
             meta: { select: "*, categories!inner(*)",},
             successNotification: false,
 
             onMutationSuccess: async ({data}) => {
+                if (!categoriesHaveChanges(data.id)) return editDrawerFormProps;
                 const {data: response, error} = await supabaseClient
                     .from('categoriesProducts')
                     .delete()
