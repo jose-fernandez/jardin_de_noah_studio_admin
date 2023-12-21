@@ -21,17 +21,17 @@ export const DashboardPage: React.FC = () => {
         <Grid container columns={24} spacing={2}>
             <Grid item xs={24} sm={24} md={24} lg={24} xl={10}>
                 <Card>
-                    <DailyRevenue />
+                    {/* <DailyRevenue /> */}
                 </Card>
             </Grid>
             <Grid item xs={24} sm={24} md={24} lg={12} xl={7}>
                 <Card>
-                    <DailyOrders />
+                    {/* <DailyOrders /> */}
                 </Card>
             </Grid>
             <Grid item xs={24} sm={24} md={24} lg={12} xl={7}>
                 <Card>
-                    <NewCustomers />
+                    {/* <NewCustomers /> */}
                 </Card>
             </Grid>
             <Grid item xs={24} md={16} xl={18}>
@@ -47,7 +47,7 @@ export const DashboardPage: React.FC = () => {
                         }}
                         title={t("dashboard.deliveryMap.title")}
                     />
-                    <DeliveryMap />
+                    {/* <DeliveryMap /> */}
                 </Card>
             </Grid>
             <Grid item xs={24} md={8} xl={6}>
@@ -58,13 +58,13 @@ export const DashboardPage: React.FC = () => {
                     }}
                 >
                     <CardHeader title={t("dashboard.timeline.title")} />
-                    <OrderTimeline />
+                    {/* <OrderTimeline /> */}
                 </Card>
             </Grid>
             <Grid item xs={24} lg={16} xl={18}>
                 <Card sx={{ height: "100%", paddingX: { xs: 2 } }}>
                     <CardHeader title={t("dashboard.recentOrders.title")} />
-                    <RecentOrders />
+                    {/* <RecentOrders /> */}
                 </Card>
             </Grid>
             <Grid item xs={24} lg={8} xl={6}>
@@ -75,7 +75,7 @@ export const DashboardPage: React.FC = () => {
                     }}
                 >
                     <CardHeader title={t("dashboard.trendingMenus.title")} />
-                    <TrendingMenu />
+                    {/* <TrendingMenu /> */}
                 </Card>
             </Grid>
         </Grid>

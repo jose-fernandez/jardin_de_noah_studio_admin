@@ -4,9 +4,15 @@ import {
 } from "@refinedev/mui";
 
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
-
+import { pink } from '@mui/material/colors';
 const LightTheme = createTheme({
     ...DefaultLightTheme,
+    palette: {
+        primary: {
+            main: pink[200]
+        }
+    },
+    // props.theme.palette.background.default
     timeLine: {
         color: {
             pending: "#fff7e6",
@@ -27,6 +33,12 @@ const LightTheme = createTheme({
 
 const DarkTheme = createTheme({
     ...DefaultDarkTheme,
+    palette: {
+        ...DefaultDarkTheme.palette,
+        primary: {
+            main: pink[200]
+        },
+    },
     timeLine: {
         color: {
             pending: "#f2a400",

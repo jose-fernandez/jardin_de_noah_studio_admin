@@ -1,13 +1,16 @@
+import {useContext} from 'react';
 import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 
-import { BikeWhiteIcon, FineFoodsIcon } from "../../components/icons";
+import { ColorModeContext } from "../../contexts";
 
 type TitleProps = {
     collapsed: boolean;
 };
 
 export const Title: React.FC<TitleProps> = ({ collapsed }) => {
+    const { mode } = useContext(ColorModeContext);
+
     return (
         <Link to="/">
             <Box
@@ -19,7 +22,13 @@ export const Title: React.FC<TitleProps> = ({ collapsed }) => {
                     color: "text.primary",
                 }}
             >
-                {collapsed ? <BikeWhiteIcon /> : <FineFoodsIcon />}
+                
+                {!collapsed
+                    ? <img width={195} src={
+                        mode === "dark" ? "/images/logo-name-dark.svg?url" : "/images/logo-name-light.svg?url"
+                    } /> 
+                    : <img width={40} src="/images/logo-icon.svg?url" /> 
+                }
             </Box>
         </Link>
     );

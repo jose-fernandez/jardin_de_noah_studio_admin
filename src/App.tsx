@@ -41,7 +41,7 @@ import { StoreList, StoreEdit, StoreCreate } from "./pages/stores";
 import { ProductList } from "./pages/products";
 import { CategoryList } from "./pages/categories";
 import { ColorModeContextProvider } from "./contexts";
-import { Header, Title, OffLayoutArea } from "./components";
+import { Header, Title } from "./components";
 import { BikeWhiteIcon } from "./components/icons/bike-white";
 import { useAutoLoginForDemo } from "./hooks";
 import { supabaseClient } from "./utility";
@@ -67,7 +67,6 @@ const App: React.FC = () => {
 
     return (
         <BrowserRouter>
-            <GitHubBanner />
             <KBarProvider>
                 <ColorModeContextProvider>
                     <CssBaseline />
@@ -101,6 +100,7 @@ const App: React.FC = () => {
                                     show: "/orders/show/:id",
                                     meta: {
                                         icon: <AddShoppingCartOutlined />,
+                                        disabled: true,
                                     },
                                 },
                                 {
@@ -108,6 +108,7 @@ const App: React.FC = () => {
                                     list: "/users",
                                     show: "/users/show/:id",
                                     meta: {
+                                        hide: true,
                                         icon: <PeopleOutlineOutlined />,
                                     },
                                 },
@@ -124,6 +125,7 @@ const App: React.FC = () => {
                                     create: "/stores/create",
                                     edit: "/stores/edit/:id",
                                     meta: {
+                                        hide: true,
                                         icon: <StoreOutlined />,
                                     },
                                 },
@@ -131,6 +133,7 @@ const App: React.FC = () => {
                                     name: "categories",
                                     list: "/categories",
                                     meta: {
+                                        hide: true,
                                         icon: <CategoryOutlined />,
                                     },
                                 },
@@ -141,6 +144,7 @@ const App: React.FC = () => {
                                     edit: "/couriers/edit/:id",
                                     show: "/couriers/show/:id",
                                     meta: {
+                                        hide: true,
                                         icon: <BikeWhiteIcon />,
                                     },
                                 },
@@ -148,6 +152,7 @@ const App: React.FC = () => {
                                     name: "reviews",
                                     list: "/reviews",
                                     meta: {
+                                        hide: true,
                                         icon: <StarBorderOutlined />,
                                     },
                                 },
@@ -165,7 +170,6 @@ const App: React.FC = () => {
                                             <ThemedLayoutV2
                                                 Header={Header}
                                                 Title={Title}
-                                                OffLayoutArea={OffLayoutArea}
                                             >
                                                 <Outlet />
                                             </ThemedLayoutV2>
@@ -302,7 +306,6 @@ const App: React.FC = () => {
                                             <ThemedLayoutV2
                                                 Header={Header}
                                                 Title={Title}
-                                                OffLayoutArea={OffLayoutArea}
                                             >
                                                 <Outlet />
                                             </ThemedLayoutV2>
